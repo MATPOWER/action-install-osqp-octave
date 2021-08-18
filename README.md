@@ -25,7 +25,7 @@ None.
     - name: Install Octave
       uses: MATPOWER/action-install-octave-linux@v1
 
-    - name: Octave ${{ env.OCTAVE_VER }} Installed
+    - name: Octave ${{ env.ML_VER }} Installed
       run: $ML_CMD ver
 
     - name: Install OSQP interface for Octave
