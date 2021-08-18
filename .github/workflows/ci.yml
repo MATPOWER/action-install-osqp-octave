@@ -1,0 +1,42 @@
+name: CI
+
+# controls when action will run
+on:
+  # triggers workflow on push events
+  push:
+  # allows workflow to be triggered manually from Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-latest, macos-10.15, macos-11, macos-latest]
+#         os: [ubuntu-18.04, ubuntu-20.04, ubuntu-latest, macos-10.15, macos-11, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Install Octave (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: MATPOWER/action-install-octave-linux@v1
+
+    - name: Install Octave (macOS)
+      if: startsWith(matrix.os, 'macos')
+      uses: MATPOWER/action-install-octave-macos@v1
+
+    - name: Octave ${{ env.OCTAVE_VER }} Installed
+      run: $ML_CMD ver
+    
+    - name: Install OSQP interface for Octave
+      uses: ./.
+
+    - name: Test OSQP availability, print version number
+      run:  |
+        export OSQP_TEST_PATH=${GITHUB_WORKSPACE}/.github/osqp
+        env $ML_PATHVAR=$OSQP_TEST_PATH $ML_CMD "if ~have_feature_osqp(), exit(1); end"
+        env $ML_PATHVAR=$OSQP_TEST_PATH $ML_CMD  "[~, vstr] = have_feature_osqp(); fprintf('Version %s\n', vstr);"
+        ls -al $OSQP_PATH

@@ -1,0 +1,43 @@
+name: 'Install OSQP (Octave)'
+description: 'Build and install Octave interface for OSQP'
+author: 'Ray Zimmerman'
+
+runs:
+  using: "composite"
+  steps:
+    # expects that Octave has already been installed
+    - name: Build OSQP
+      run: |
+        echo "OSQP_PATH=$HOME/build/osqp-matlab" >> $GITHUB_ENV
+        [ ! -d $HOME/build ] && mkdir -p $HOME/build
+        cd $HOME/build
+        git clone --recursive https://github.com/oxfordcontrol/osqp
+        git clone --recurse-submodules https://github.com/oxfordcontrol/osqp-matlab
+        mkdir -p $HOME/build/osqp/build
+        [ ! -d $HOME/install ] && mkdir -p $HOME/install
+        cd $HOME/build/osqp/build
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/install -G "Unix Makefiles" ..
+        cmake --build .
+        cmake --install .
+      shell: bash
+
+    - name: Build OSQP Octave interface
+      run: |
+        ln -s /usr/include/octave-${OCTAVE_VER}/octave/Matrix.h $HOME/install/include/osqp/matrix.h
+        ls -al $HOME/install/include/osqp
+        cd $HOME/build/osqp-matlab
+        $ML_CMD "mex -I$HOME/install/include/osqp  -I$HOME/install/include/qdldl -I$HOME/build/osqp/lin_sys/direct/qdldl osqp_mex.cpp $HOME/install/lib/libosqp.a"
+        ls -al
+      shell: bash
+
+#     - name: Fix OSQP for Octave < 5.x
+#       if: startsWith(env.OCTAVE_VER, '4')
+#       run: echo "OSQP_PATH=${GITHUB_WORKSPACE}/.github/osqp:${HOME}/build/osqp-matlab" >> $GITHUB_ENV
+
+    - name: Install OSQP Octave interface
+      run: $ML_CMD "addpath('${OSQP_PATH}'); savepath"
+      shell: bash
+
+branding:
+  icon: 'zap'
+  color: 'yellow'
