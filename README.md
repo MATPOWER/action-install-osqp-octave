@@ -38,7 +38,7 @@ None.
       id: cache-osqp
       env:
         cache-name: osqp
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/build/osqp-matlab
         key: ${{ matrix.os }}-${{ env.cache-name }}
