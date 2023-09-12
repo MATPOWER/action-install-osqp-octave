@@ -14,12 +14,14 @@ runs:
     # expects that Octave has already been installed
     - name: Build OSQP
       run: |
+        export OSQP_TAG=v0.6.2
+        export OSQP_MATLAB_TAG=master
         export OSQP_PATH=$HOME/build/osqp-matlab
         ${{ inputs.cached }} && echo "cached - skip build" || echo "Not cached - build it"
         ! ${{ inputs.cached }} && [ ! -d $HOME/build ] && mkdir -p $HOME/build
         ! ${{ inputs.cached }} && cd $HOME/build
-        ! ${{ inputs.cached }} && git clone --recursive https://github.com/oxfordcontrol/osqp
-        ! ${{ inputs.cached }} && git clone --recurse-submodules https://github.com/oxfordcontrol/osqp-matlab
+        ! ${{ inputs.cached }} && git clone -b ${OSQP_TAG} --recursive https://github.com/oxfordcontrol/osqp
+        ! ${{ inputs.cached }} && git clone -b ${OSQP_MATLAB_TAG} --recurse-submodules https://github.com/oxfordcontrol/osqp-matlab
         ! ${{ inputs.cached }} && mkdir -p $HOME/build/osqp/build
         ! ${{ inputs.cached }} && [ ! -d $HOME/install ] && mkdir -p $HOME/install
         ! ${{ inputs.cached }} && cd $HOME/build/osqp/build
